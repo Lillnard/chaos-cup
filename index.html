@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copa do Caos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <header class="topbar">
+      <h1>⚽ Copa do Caos</h1>
+      <p>Futebol, sorte, cartas e decisões duvidosas com consequências maravilhosas.</p>
+    </header>
+
+    <!-- TELA DE SELEÇÃO -->
+    <section id="screen-selection" class="screen active">
+      <div class="section-header">
+        <h2 id="selection-title">Escolha seu time</h2>
+        <p id="selection-subtitle">Clique em um card para revelar seu destino.</p>
+      </div>
+
+      <div id="selection-grid" class="card-grid"></div>
+
+      <div class="actions">
+        <button id="next-stage-btn" class="btn hidden">Próxima etapa</button>
+        <button id="start-match-btn" class="btn hidden">Iniciar partida</button>
+      </div>
+    </section>
+
+    <!-- TELA DA PARTIDA -->
+    <section id="screen-match" class="screen">
+      <div class="scoreboard">
+        <div class="team-box">
+          <div class="team-shield" id="player-shield">⚪</div>
+          <div class="team-name" id="player-team-name">Seu Time</div>
+        </div>
+
+        <div class="center-box">
+          <div class="score" id="score-display">0 x 0</div>
+          <div class="minute" id="minute-display">00'</div>
+          <div class="difficulty" id="difficulty-display">Dificuldade: Fácil</div>
+        </div>
+
+        <div class="team-box">
+          <div class="team-shield" id="enemy-shield">⚪</div>
+          <div class="team-name" id="enemy-team-name">Adversário</div>
+        </div>
+      </div>
+
+      <div class="match-layout">
+        <div class="event-panel">
+          <div class="section-header">
+            <h2>Escolha 3 cartas</h2>
+            <p>Cada decisão pode mudar o rumo do jogo.</p>
+          </div>
+
+          <div id="event-cards" class="event-cards"></div>
+
+          <div class="actions">
+            <button id="next-turn-btn" class="btn hidden">Próximo lance</button>
+            <button id="restart-btn" class="btn secondary hidden">Jogar novamente</button>
+          </div>
+        </div>
+
+        <div class="log-panel">
+          <div class="section-header">
+            <h2>Narração da partida</h2>
+          </div>
+          <div id="match-log" class="match-log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL -->
+    <div id="confirm-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3 id="modal-title">Confirmar escolha</h3>
+        <p id="modal-text">Deseja realmente escolher este card?</p>
+        <div class="modal-actions">
+          <button id="confirm-yes" class="btn">Confirmar</button>
+          <button id="confirm-no" class="btn secondary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
