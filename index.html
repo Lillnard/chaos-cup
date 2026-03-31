@@ -9,16 +9,19 @@
 <body>
   <div class="app">
 
-    <header class="topbar">
-      <h1>⚽ Copa do Caos</h1>
-      <p>Futebol, cartas, sorte e um campeonato que não perdoa.</p>
+    <!-- HEADER / TOPO -->
+    <header id="top-header" class="top-header">
+      <div class="brand">
+        <h1>⚽ Copa do Caos</h1>
+        <p>Cartas, sorte, futebol e decisões perigosamente irreversíveis.</p>
+      </div>
     </header>
 
-    <!-- CAMPEONATO -->
-    <section class="tournament-bar">
-      <div class="tournament-info">
+    <!-- BARRA DO CAMPEONATO -->
+    <section id="tournament-bar" class="tournament-bar">
+      <div class="tournament-top">
         <span id="stage-badge" class="stage-badge">Oitavas de final</span>
-        <span id="campaign-status" class="campaign-status">Escolha seu time para iniciar a campanha</span>
+        <span id="campaign-status" class="campaign-status">Escolha seu time para iniciar</span>
       </div>
 
       <div class="bracket-mini">
@@ -29,8 +32,70 @@
       </div>
     </section>
 
+    <!-- TELA INICIAL -->
+    <section id="screen-home" class="screen active">
+      <div class="menu-card">
+        <h2>Bem-vindo à Copa do Caos</h2>
+        <p>
+          Monte sua trajetória, escolha cartas, sobreviva aos lances aleatórios
+          e tente levantar a taça.
+        </p>
+
+        <div class="home-actions">
+          <button id="open-mode-menu-btn" class="btn primary">Iniciar jogo</button>
+          <button id="open-how-to-play-btn" class="btn secondary">Como jogar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA MODOS -->
+    <section id="screen-mode" class="screen">
+      <div class="menu-card">
+        <h2>Escolha o modo</h2>
+        <p>Selecione como deseja entrar em campo.</p>
+
+        <div class="mode-grid">
+          <button id="single-match-btn" class="mode-button">
+            <span class="mode-title">Partida única</span>
+            <span class="mode-desc">Uma partida só, ideal para testar o jogo.</span>
+          </button>
+
+          <button id="championship-btn" class="mode-button">
+            <span class="mode-title">Campeonato</span>
+            <span class="mode-desc">Avance por várias fases até a final.</span>
+          </button>
+        </div>
+
+        <div class="home-actions">
+          <button id="back-home-btn" class="btn secondary">Voltar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO JOGAR -->
+    <section id="screen-how-to-play" class="screen">
+      <div class="menu-card howto-card">
+        <h2>Como jogar</h2>
+
+        <div class="howto-scroll">
+          <p><strong>1.</strong> Escolha seu time entre os cards ocultos.</p>
+          <p><strong>2.</strong> Escolha o adversário da rodada.</p>
+          <p><strong>3.</strong> Escolha um bônus secreto, revelado no segundo tempo.</p>
+          <p><strong>4.</strong> Durante a partida, selecione 3 cartas entre 10.</p>
+          <p><strong>5.</strong> As cartas se revelam uma por uma e alteram o jogo.</p>
+          <p><strong>6.</strong> Pênaltis possuem uma tela própria. Você escolhe o canto do goleiro.</p>
+          <p><strong>7.</strong> Na partida única, o jogo termina em uma só partida.</p>
+          <p><strong>8.</strong> No campeonato, você precisa vencer fase após fase até a final.</p>
+        </div>
+
+        <div class="home-actions">
+          <button id="close-how-to-play-btn" class="btn primary">Entendi</button>
+        </div>
+      </div>
+    </section>
+
     <!-- SELEÇÃO -->
-    <section id="screen-selection" class="screen active">
+    <section id="screen-selection" class="screen">
       <div class="selection-shell">
         <div class="section-header compact">
           <h2 id="selection-title">Escolha seu time</h2>
@@ -40,14 +105,13 @@
         <div id="selection-grid" class="selection-grid"></div>
 
         <div class="actions compact-actions">
-          <button id="next-stage-btn" class="btn hidden">Próxima etapa</button>
-          <button id="to-bonus-btn" class="btn hidden">Escolher bônus secreto</button>
-          <button id="start-match-btn" class="btn hidden">Iniciar partida</button>
+          <button id="next-stage-btn" class="btn primary hidden">Próxima etapa</button>
+          <button id="to-bonus-btn" class="btn primary hidden">Escolher bônus secreto</button>
         </div>
       </div>
     </section>
 
-    <!-- ESCOLHA DO BÔNUS -->
+    <!-- BÔNUS -->
     <section id="screen-bonus" class="screen">
       <div class="bonus-shell">
         <div class="section-header">
@@ -58,79 +122,102 @@
         <div id="bonus-grid" class="bonus-grid"></div>
 
         <div class="actions">
-          <button id="confirm-bonus-stage-btn" class="btn hidden">Iniciar partida</button>
+          <button id="confirm-bonus-stage-btn" class="btn primary hidden">Iniciar partida</button>
         </div>
       </div>
     </section>
 
     <!-- PARTIDA -->
     <section id="screen-match" class="screen">
-      <div class="scoreboard sticky-scoreboard">
-        <div class="team-box">
-          <div class="team-shield" id="player-shield">⚪</div>
-          <div class="team-name" id="player-team-name">Seu Time</div>
-        </div>
+      <div class="match-shell">
+        <div class="scoreboard compact-scoreboard">
+          <div class="score-row">
+            <div class="score-team" id="player-side-inline">
+              <span class="inline-shield" id="player-shield">⚪</span>
+              <span class="inline-team-name" id="player-team-name">Seu Time</span>
+            </div>
 
-        <div class="center-box">
-          <div class="score" id="score-display">0 x 0</div>
-          <div class="minute" id="minute-display">00'</div>
-          <div class="difficulty" id="difficulty-display">Dificuldade: Fácil</div>
-          <div class="stage-inline" id="match-stage-display">Oitavas de final</div>
-        </div>
+            <div class="inline-score" id="score-display">0 x 0</div>
 
-        <div class="team-box">
-          <div class="team-shield" id="enemy-shield">⚪</div>
-          <div class="team-name" id="enemy-team-name">Adversário</div>
-        </div>
-      </div>
-
-      <div class="match-layout">
-        <div class="event-panel">
-          <div class="section-header">
-            <h2>Escolha 3 cartas entre 10</h2>
-            <p>As cartas se revelam uma após a outra e mudam o rumo da partida.</p>
+            <div class="score-team score-team-right" id="enemy-side-inline">
+              <span class="inline-team-name" id="enemy-team-name">Adversário</span>
+              <span class="inline-shield" id="enemy-shield">⚪</span>
+            </div>
           </div>
 
-          <div id="event-cards" class="event-cards hidden-cards-grid"></div>
-
-          <div class="actions">
-            <button id="reveal-selected-btn" class="btn hidden">Revelar cartas escolhidas</button>
-            <button id="next-turn-btn" class="btn hidden">Próximo lance</button>
-            <button id="restart-btn" class="btn secondary hidden">Reiniciar campanha</button>
+          <div class="score-subrow">
+            <span class="minute" id="minute-display">00'</span>
+            <span class="difficulty" id="difficulty-display">Dificuldade: Fácil</span>
           </div>
         </div>
 
-        <div class="log-panel">
-          <div class="section-header">
-            <h2>Narração da partida</h2>
+        <div class="match-content">
+          <div class="event-panel">
+            <div class="section-header compact">
+              <h2>Escolha 3 cartas</h2>
+              <p>Selecione 3 entre 10 e revele o destino da rodada.</p>
+            </div>
+
+            <div id="event-cards" class="event-cards hidden-cards-grid"></div>
+
+            <div class="actions">
+              <button id="reveal-selected-btn" class="btn primary hidden">Revelar cartas escolhidas</button>
+              <button id="next-turn-btn" class="btn primary hidden">Próximo lance</button>
+            </div>
           </div>
-          <div id="match-log" class="match-log"></div>
+
+          <div class="log-panel">
+            <div class="section-header compact">
+              <h2>Narração</h2>
+            </div>
+            <div id="match-log" class="match-log"></div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- RESULTADO -->
     <section id="screen-result" class="screen">
-      <div class="result-card">
+      <div class="menu-card">
         <h2 id="result-title">Resultado</h2>
         <p id="result-text">Texto do resultado</p>
 
-        <div class="result-actions">
-          <button id="continue-campaign-btn" class="btn hidden">Avançar no campeonato</button>
+        <div class="home-actions">
+          <button id="continue-campaign-btn" class="btn primary hidden">Avançar</button>
           <button id="restart-campaign-btn" class="btn secondary hidden">Voltar ao início</button>
         </div>
       </div>
     </section>
 
-    <!-- MODAL -->
+    <!-- MODAL CONFIRMAÇÃO -->
     <div id="confirm-modal" class="modal hidden">
       <div class="modal-content">
         <h3 id="modal-title">Confirmar escolha</h3>
         <p id="modal-text">Esta escolha não pode ser desfeita até o fim do jogo.</p>
         <div class="modal-actions">
-          <button id="confirm-yes" class="btn">Confirmar</button>
+          <button id="confirm-yes" class="btn primary">Confirmar</button>
           <button id="confirm-no" class="btn secondary">Cancelar</button>
         </div>
+      </div>
+    </div>
+
+    <!-- TELA DE PÊNALTI -->
+    <div id="penalty-screen" class="penalty-screen hidden">
+      <div class="penalty-card">
+        <h2 id="penalty-title">Pênalti!</h2>
+        <p id="penalty-subtitle">Escolha para qual canto o goleiro deve pular.</p>
+
+        <div class="penalty-arena">
+          <div class="goal-visual">
+            <div class="goal-post"></div>
+            <div id="keeper-marker" class="keeper-marker">🧤</div>
+            <div id="ball-marker" class="ball-marker hidden">⚽</div>
+          </div>
+        </div>
+
+        <div id="penalty-options" class="penalty-options"></div>
+
+        <div id="penalty-feedback" class="penalty-feedback"></div>
       </div>
     </div>
 

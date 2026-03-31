@@ -40,7 +40,7 @@ const TEAMS = [
       id: "bonus_cancel_penalty",
       icon: "🧤",
       title: "Escudo do Goleiro",
-      description: "Anula o primeiro pênalti contra sofrido no segundo tempo.",
+      description: "Anula o primeiro pênalti contra do segundo tempo.",
       effect: "cancel_penalty_against"
     },
     {
@@ -54,103 +54,33 @@ const TEAMS = [
       id: "bonus_super_save",
       icon: "🧱",
       title: "Defesa Milagrosa",
-      description: "Bloqueia automaticamente o próximo grande lance perigoso do rival.",
+      description: "Bloqueia a próxima grande chance rival.",
       effect: "save_next_big_enemy"
     },
     {
       id: "bonus_extra_pressure",
       icon: "🔥",
       title: "Pressão Total",
-      description: "Aumenta a chance de gol do seu time no segundo tempo.",
+      description: "Aumenta a força ofensiva do seu time no segundo tempo.",
       effect: "player_attack_boost"
     }
   ];
   
   const EVENT_POOL = [
-    {
-      type: "goal_player",
-      title: "Ataque fulminante",
-      description: "Seu time encaixa um ataque agressivo.",
-      tag: "Chance de gol"
-    },
-    {
-      type: "goal_enemy",
-      title: "Vacilo defensivo",
-      description: "O rival encontra espaço nas costas da defesa.",
-      tag: "Risco"
-    },
-    {
-      type: "yellow_player",
-      title: "Carrinho atrasado",
-      description: "Seu time chega forte demais na jogada.",
-      tag: "Cartão"
-    },
-    {
-      type: "yellow_enemy",
-      title: "Falta tática rival",
-      description: "O adversário mata a jogada.",
-      tag: "Cartão"
-    },
-    {
-      type: "corner_player",
-      title: "Escanteio a favor",
-      description: "Chance na bola parada.",
-      tag: "Bola parada"
-    },
-    {
-      type: "corner_enemy",
-      title: "Escanteio contra",
-      description: "A zaga afasta mal.",
-      tag: "Bola parada"
-    },
-    {
-      type: "danger_player",
-      title: "Jogada de perigo",
-      description: "Seu time leva a melhor na construção.",
-      tag: "Pressão"
-    },
-    {
-      type: "danger_enemy",
-      title: "Contra-ataque rival",
-      description: "O adversário dispara em velocidade.",
-      tag: "Pressão"
-    },
-    {
-      type: "penalty_player",
-      title: "Pênalti para seu time",
-      description: "O juiz aponta para a marca da cal.",
-      tag: "Decisivo"
-    },
-    {
-      type: "penalty_enemy",
-      title: "Pênalti para o adversário",
-      description: "Drama total na área.",
-      tag: "Decisivo"
-    },
-    {
-      type: "nothing",
-      title: "Jogo travado",
-      description: "Muita disputa, pouca criação.",
-      tag: "Neutro"
-    },
-    {
-      type: "boost",
-      title: "Momento de inspiração",
-      description: "Seu time cresce emocionalmente.",
-      tag: "Bônus"
-    },
-    {
-      type: "danger_player_big",
-      title: "Grande chance criada",
-      description: "Seu ataque desmonta a defesa rival.",
-      tag: "Grande chance"
-    },
-    {
-      type: "danger_enemy_big",
-      title: "Grande chance rival",
-      description: "O adversário fica cara a cara com o goleiro.",
-      tag: "Grande chance"
-    }
+    { type: "goal_player", title: "Ataque fulminante", description: "Seu time acelera com perigo.", tag: "Chance de gol" },
+    { type: "goal_enemy", title: "Vacilo defensivo", description: "O rival encontra espaço.", tag: "Risco" },
+    { type: "yellow_player", title: "Carrinho atrasado", description: "Chegada forte do seu time.", tag: "Cartão" },
+    { type: "yellow_enemy", title: "Falta tática rival", description: "O adversário para a jogada.", tag: "Cartão" },
+    { type: "corner_player", title: "Escanteio a favor", description: "Chance de bola parada.", tag: "Bola parada" },
+    { type: "corner_enemy", title: "Escanteio contra", description: "Perigo na sua área.", tag: "Bola parada" },
+    { type: "danger_player", title: "Jogada de perigo", description: "Seu ataque cresce.", tag: "Pressão" },
+    { type: "danger_enemy", title: "Contra-ataque rival", description: "O rival dispara.", tag: "Pressão" },
+    { type: "penalty_player", title: "Pênalti para seu time", description: "Drama na marca da cal.", tag: "Decisivo" },
+    { type: "penalty_enemy", title: "Pênalti para o rival", description: "A tensão sobe.", tag: "Decisivo" },
+    { type: "nothing", title: "Jogo travado", description: "Muita disputa no meio.", tag: "Neutro" },
+    { type: "boost", title: "Momento de inspiração", description: "Seu time ganha confiança.", tag: "Bônus" },
+    { type: "danger_player_big", title: "Grande chance criada", description: "Ataque perigoso.", tag: "Grande chance" },
+    { type: "danger_enemy_big", title: "Grande chance rival", description: "Cara a cara com o goleiro.", tag: "Grande chance" }
   ];
   
   const STAGES = [
@@ -161,7 +91,8 @@ const TEAMS = [
   ];
   
   const state = {
-    phase: "choose-player",
+    gameMode: null, // single | championship
+    phase: "home",
     availableTeams: [],
     pendingChoice: null,
   
@@ -189,24 +120,37 @@ const TEAMS = [
   
     turnCards: [],
     selectedTurnCards: [],
-    revealQueueRunning: false
+    revealQueueRunning: false,
+  
+    penaltyResolver: null
   };
   
   // ELEMENTOS
+  const topHeader = document.getElementById("top-header");
+  const tournamentBar = document.getElementById("tournament-bar");
+  
+  const screenHome = document.getElementById("screen-home");
+  const screenMode = document.getElementById("screen-mode");
+  const screenHowToPlay = document.getElementById("screen-how-to-play");
   const screenSelection = document.getElementById("screen-selection");
   const screenBonus = document.getElementById("screen-bonus");
   const screenMatch = document.getElementById("screen-match");
   const screenResult = document.getElementById("screen-result");
   
+  const openModeMenuBtn = document.getElementById("open-mode-menu-btn");
+  const openHowToPlayBtn = document.getElementById("open-how-to-play-btn");
+  const closeHowToPlayBtn = document.getElementById("close-how-to-play-btn");
+  const singleMatchBtn = document.getElementById("single-match-btn");
+  const championshipBtn = document.getElementById("championship-btn");
+  const backHomeBtn = document.getElementById("back-home-btn");
+  
   const selectionTitle = document.getElementById("selection-title");
   const selectionSubtitle = document.getElementById("selection-subtitle");
   const selectionGrid = document.getElementById("selection-grid");
-  
   const bonusGrid = document.getElementById("bonus-grid");
   
   const nextStageBtn = document.getElementById("next-stage-btn");
   const toBonusBtn = document.getElementById("to-bonus-btn");
-  const startMatchBtn = document.getElementById("start-match-btn");
   const confirmBonusStageBtn = document.getElementById("confirm-bonus-stage-btn");
   
   const playerShield = document.getElementById("player-shield");
@@ -216,13 +160,11 @@ const TEAMS = [
   const scoreDisplay = document.getElementById("score-display");
   const minuteDisplay = document.getElementById("minute-display");
   const difficultyDisplay = document.getElementById("difficulty-display");
-  const matchStageDisplay = document.getElementById("match-stage-display");
   
   const eventCardsContainer = document.getElementById("event-cards");
   const matchLog = document.getElementById("match-log");
   const revealSelectedBtn = document.getElementById("reveal-selected-btn");
   const nextTurnBtn = document.getElementById("next-turn-btn");
-  const restartBtn = document.getElementById("restart-btn");
   
   const resultTitle = document.getElementById("result-title");
   const resultText = document.getElementById("result-text");
@@ -238,6 +180,14 @@ const TEAMS = [
   const confirmYes = document.getElementById("confirm-yes");
   const confirmNo = document.getElementById("confirm-no");
   
+  const penaltyScreen = document.getElementById("penalty-screen");
+  const penaltyTitle = document.getElementById("penalty-title");
+  const penaltySubtitle = document.getElementById("penalty-subtitle");
+  const penaltyOptions = document.getElementById("penalty-options");
+  const penaltyFeedback = document.getElementById("penalty-feedback");
+  const keeperMarker = document.getElementById("keeper-marker");
+  const ballMarker = document.getElementById("ball-marker");
+  
   // UTIL
   function shuffle(array) {
     return [...array].sort(() => Math.random() - 0.5);
@@ -251,66 +201,14 @@ const TEAMS = [
     return new Promise(resolve => setTimeout(resolve, ms));
   }
   
-  function getDifficultyLabel() {
-    if (state.difficulty === 1) return "Fácil";
-    if (state.difficulty === 2) return "Médio";
-    return "Difícil";
-  }
-  
   function getCurrentStage() {
     return STAGES[state.currentStageIndex];
   }
   
-  function showScreen(screen) {
-    [screenSelection, screenBonus, screenMatch, screenResult].forEach(s => s.classList.remove("active"));
-    screen.classList.add("active");
-  }
-  
-  function updateTournamentUI() {
-    const stage = getCurrentStage();
-    stageBadge.textContent = stage.label;
-  
-    const map = {
-      oitavas: document.getElementById("step-oitavas"),
-      quartas: document.getElementById("step-quartas"),
-      semi: document.getElementById("step-semi"),
-      final: document.getElementById("step-final")
-    };
-  
-    Object.values(map).forEach(el => {
-      el.classList.remove("active", "done");
-    });
-  
-    STAGES.forEach((s, idx) => {
-      const el = map[s.key];
-      if (idx < state.currentStageIndex) el.classList.add("done");
-      if (idx === state.currentStageIndex) el.classList.add("active");
-    });
-  }
-  
-  function updateScoreboard() {
-    const stage = getCurrentStage();
-  
-    playerShield.textContent = state.playerTeam?.emoji || "⚪";
-    playerTeamName.textContent = state.playerTeam?.name || "Seu Time";
-    enemyShield.textContent = state.enemyTeam?.emoji || "⚪";
-    enemyTeamName.textContent = state.enemyTeam?.name || "Adversário";
-  
-    scoreDisplay.textContent = `${state.scorePlayer} x ${state.scoreEnemy}`;
-    minuteDisplay.textContent = `${String(state.minute).padStart(2, "0")}'`;
-    difficultyDisplay.textContent = `Dificuldade: ${getDifficultyLabel()}`;
-    matchStageDisplay.textContent = stage.label;
-  }
-  
-  function setCampaignStatus(text) {
-    campaignStatus.textContent = text;
-  }
-  
-  function logMessage(message, type = "default") {
-    const div = document.createElement("div");
-    div.className = `log-entry ${type}`;
-    div.innerHTML = message;
-    matchLog.prepend(div);
+  function getDifficultyLabel() {
+    if (state.difficulty === 1) return "Fácil";
+    if (state.difficulty === 2) return "Médio";
+    return "Difícil";
   }
   
   function iconBall() {
@@ -325,22 +223,153 @@ const TEAMS = [
     return "🟨";
   }
   
-  // SELEÇÃO DE TIME E ADVERSÁRIO
+  function showScreen(screen) {
+    [
+      screenHome,
+      screenMode,
+      screenHowToPlay,
+      screenSelection,
+      screenBonus,
+      screenMatch,
+      screenResult
+    ].forEach(s => s.classList.remove("active"));
+  
+    screen.classList.add("active");
+  }
+  
+  function setMatchVisualState(inMatch) {
+    if (inMatch) {
+      topHeader.classList.add("hidden");
+      tournamentBar.classList.add("hidden");
+    } else {
+      topHeader.classList.remove("hidden");
+      if (state.gameMode === "championship") {
+        tournamentBar.classList.remove("hidden");
+      } else {
+        tournamentBar.classList.add("hidden");
+      }
+    }
+  }
+  
+  function updateTournamentUI() {
+    const map = {
+      oitavas: document.getElementById("step-oitavas"),
+      quartas: document.getElementById("step-quartas"),
+      semi: document.getElementById("step-semi"),
+      final: document.getElementById("step-final")
+    };
+  
+    Object.values(map).forEach(el => el.classList.remove("active", "done"));
+  
+    if (state.gameMode !== "championship") {
+      tournamentBar.classList.add("hidden");
+      return;
+    }
+  
+    tournamentBar.classList.remove("hidden");
+    const stage = getCurrentStage();
+    stageBadge.textContent = stage.label;
+  
+    STAGES.forEach((s, idx) => {
+      const el = map[s.key];
+      if (idx < state.currentStageIndex) el.classList.add("done");
+      if (idx === state.currentStageIndex) el.classList.add("active");
+    });
+  }
+  
+  function setCampaignStatus(text) {
+    campaignStatus.textContent = text;
+  }
+  
+  function updateScoreboard() {
+    playerShield.textContent = state.playerTeam?.emoji || "⚪";
+    playerTeamName.textContent = state.playerTeam?.name || "Seu Time";
+    enemyShield.textContent = state.enemyTeam?.emoji || "⚪";
+    enemyTeamName.textContent = state.enemyTeam?.name || "Adversário";
+    scoreDisplay.textContent = `${state.scorePlayer} x ${state.scoreEnemy}`;
+    minuteDisplay.textContent = `${String(state.minute).padStart(2, "0")}'`;
+    difficultyDisplay.textContent = `Dificuldade: ${getDifficultyLabel()}`;
+  }
+  
+  function logMessage(message, type = "default") {
+    const div = document.createElement("div");
+    div.className = `log-entry ${type}`;
+    div.innerHTML = message;
+    matchLog.prepend(div);
+  }
+  
+  // TELAS INICIAIS
+  function goHome() {
+    state.phase = "home";
+    state.gameMode = null;
+    state.playerTeam = null;
+    state.enemyTeam = null;
+    state.hiddenBonus = null;
+    state.currentStageIndex = 0;
+    setMatchVisualState(false);
+    tournamentBar.classList.add("hidden");
+    showScreen(screenHome);
+  }
+  
+  function openModeMenu() {
+    state.phase = "mode";
+    setMatchVisualState(false);
+    tournamentBar.classList.add("hidden");
+    showScreen(screenMode);
+  }
+  
+  function openHowToPlay() {
+    state.phase = "howto";
+    setMatchVisualState(false);
+    tournamentBar.classList.add("hidden");
+    showScreen(screenHowToPlay);
+  }
+  
+  function startSingleMatchMode() {
+    state.gameMode = "single";
+    state.currentStageIndex = 0;
+    state.phase = "choose-player";
+    setMatchVisualState(false);
+    tournamentBar.classList.add("hidden");
+    setupSelectionPhase();
+    showScreen(screenSelection);
+  }
+  
+  function startChampionshipMode() {
+    state.gameMode = "championship";
+    state.currentStageIndex = 0;
+    state.phase = "choose-player";
+    updateTournamentUI();
+    setCampaignStatus("Escolha o clube que vai tentar conquistar o torneio");
+    setMatchVisualState(false);
+    setupSelectionPhase();
+    showScreen(screenSelection);
+  }
+  
+  // SELEÇÃO
   function setupSelectionPhase() {
     state.availableTeams = shuffle(TEAMS);
     selectionGrid.innerHTML = "";
     nextStageBtn.classList.add("hidden");
     toBonusBtn.classList.add("hidden");
-    startMatchBtn.classList.add("hidden");
   
     if (state.phase === "choose-player") {
       selectionTitle.textContent = "Escolha seu time";
-      selectionSubtitle.textContent = "20 cards, um destino. Sua escolha define a campanha inteira.";
-      setCampaignStatus("Escolha o clube que vai tentar conquistar o torneio");
+      selectionSubtitle.textContent = "20 cards. Uma escolha. O destino assina o contrato.";
+      if (state.gameMode === "championship") {
+        setCampaignStatus("Escolha o clube que vai tentar conquistar o torneio");
+      }
     } else {
-      selectionTitle.textContent = `Escolha o adversário da ${getCurrentStage().label.toLowerCase()}`;
-      selectionSubtitle.textContent = "Agora o próximo obstáculo será sorteado pela sua escolha.";
-      setCampaignStatus(`Defina o rival da ${getCurrentStage().label.toLowerCase()}`);
+      const label = state.gameMode === "championship"
+        ? getCurrentStage().label.toLowerCase()
+        : "partida";
+      selectionTitle.textContent = state.gameMode === "championship"
+        ? `Escolha o adversário da ${label}`
+        : "Escolha seu adversário";
+      selectionSubtitle.textContent = "Agora o próximo desafio será revelado pelos cards.";
+      if (state.gameMode === "championship") {
+        setCampaignStatus(`Defina o rival da ${label}`);
+      }
     }
   
     state.availableTeams.forEach((team, index) => {
@@ -370,7 +399,7 @@ const TEAMS = [
       return;
     }
   
-    state.pendingChoice = index;
+    state.pendingChoice = { type: "selection", index };
     modalTitle.textContent = "Confirmar escolha";
     modalText.textContent = "Esta escolha não pode ser desfeita até o fim do jogo.";
     confirmModal.classList.remove("hidden");
@@ -397,11 +426,11 @@ const TEAMS = [
   
     if (state.phase === "choose-player") {
       state.playerTeam = chosenTeam;
-      logMessage(`<strong>🏟️ Campanha iniciada:</strong> um novo clube foi assumido para a jornada rumo ao título.`);
+      logMessage(`<strong>🏟️ Campanha iniciada:</strong> um clube foi escolhido para entrar em campo.`);
       nextStageBtn.classList.remove("hidden");
     } else {
       state.enemyTeam = chosenTeam;
-      logMessage(`<strong>🧭 Confronto definido:</strong> o adversário da vez já está traçado pelo destino.`);
+      logMessage(`<strong>🧭 Adversário definido:</strong> o próximo confronto foi traçado.`);
       toBonusBtn.classList.remove("hidden");
     }
   }
@@ -411,7 +440,10 @@ const TEAMS = [
     bonusGrid.innerHTML = "";
     confirmBonusStageBtn.classList.add("hidden");
     showScreen(screenBonus);
-    setCampaignStatus("Escolha um bônus secreto para o segundo tempo");
+  
+    if (state.gameMode === "championship") {
+      setCampaignStatus("Escolha um bônus secreto para o segundo tempo");
+    }
   
     const cards = shuffle(BONUS_CARDS).slice(0, 4);
   
@@ -431,16 +463,15 @@ const TEAMS = [
         </div>
       `;
   
-      card.addEventListener("click", () => handleBonusPick(index, cards));
+      card.addEventListener("click", () => {
+        state.pendingChoice = { type: "bonus", index, options: cards };
+        modalTitle.textContent = "Confirmar escolha";
+        modalText.textContent = "Esta escolha não pode ser desfeita até o fim do jogo.";
+        confirmModal.classList.remove("hidden");
+      });
+  
       bonusGrid.appendChild(card);
     });
-  }
-  
-  function handleBonusPick(index, currentBonusOptions) {
-    state.pendingChoice = { type: "bonus", index, options: currentBonusOptions };
-    modalTitle.textContent = "Confirmar escolha";
-    modalText.textContent = "Esta escolha não pode ser desfeita até o fim do jogo.";
-    confirmModal.classList.remove("hidden");
   }
   
   function revealBonusChoice(index, currentBonusOptions) {
@@ -453,7 +484,7 @@ const TEAMS = [
     });
   
     state.hiddenBonus = currentBonusOptions[index];
-    logMessage(`<strong>🎁 Bônus secreto escolhido:</strong> a carta foi guardada para o segundo tempo.`);
+    logMessage(`<strong>🎁 Bônus secreto escolhido:</strong> ele será revelado no segundo tempo.`);
     confirmBonusStageBtn.classList.remove("hidden");
   }
   
@@ -471,6 +502,7 @@ const TEAMS = [
     state.turnCards = [];
     state.selectedTurnCards = [];
     state.revealQueueRunning = false;
+    state.penaltyResolver = null;
   
     state.bonusFlags = {
       cancelPenaltyAgainstAvailable: false,
@@ -483,14 +515,14 @@ const TEAMS = [
     resetMatchState();
     matchLog.innerHTML = "";
     updateScoreboard();
-    updateTournamentUI();
+    setMatchVisualState(true);
     showScreen(screenMatch);
-    setCampaignStatus(`Partida em andamento na fase ${getCurrentStage().label.toLowerCase()}`);
   
-    logMessage(
-      `<strong>📣 Apito inicial!</strong> ${state.playerTeam.name} enfrenta ${state.enemyTeam.name} pela ${getCurrentStage().label.toLowerCase()}.`
-    );
+    const intro = state.gameMode === "championship"
+      ? `${state.playerTeam.name} enfrenta ${state.enemyTeam.name} pela ${getCurrentStage().label.toLowerCase()}.`
+      : `${state.playerTeam.name} enfrenta ${state.enemyTeam.name} em uma partida única.`;
   
+    logMessage(`<strong>📣 Apito inicial!</strong> ${intro}`);
     generateTurn();
   }
   
@@ -501,7 +533,6 @@ const TEAMS = [
     revealSelectedBtn.classList.add("hidden");
     state.selectedTurnCards = [];
     state.turnCards = shuffle(EVENT_POOL).slice(0, 10);
-  
     eventCardsContainer.innerHTML = "";
   
     state.turnCards.forEach((eventData, index) => {
@@ -548,8 +579,7 @@ const TEAMS = [
   }
   
   async function revealChosenCardsSequentially() {
-    if (state.selectedTurnCards.length !== 3) return;
-    if (state.revealQueueRunning) return;
+    if (state.selectedTurnCards.length !== 3 || state.revealQueueRunning) return;
   
     state.revealQueueRunning = true;
     revealSelectedBtn.classList.add("hidden");
@@ -563,14 +593,14 @@ const TEAMS = [
       cardElement.classList.add("revealed", "used", "disabled");
       allCards.forEach(c => c.classList.add("disabled"));
   
-      await delay(650);
+      await delay(500);
   
       advanceMinute();
-      checkSecondHalfBonus();
-      resolveEvent(eventData);
+      await checkSecondHalfBonus();
+      await resolveEvent(eventData);
       updateScoreboard();
   
-      await delay(900);
+      await delay(700);
   
       if (state.minute >= 90) {
         endMatch();
@@ -578,12 +608,6 @@ const TEAMS = [
         return;
       }
     }
-  
-    allCards.forEach((card, index) => {
-      if (!state.selectedTurnCards.includes(index)) {
-        card.classList.add("disabled");
-      }
-    });
   
     nextTurnBtn.classList.remove("hidden");
     state.revealQueueRunning = false;
@@ -600,43 +624,38 @@ const TEAMS = [
     if (state.minute > 90) state.minute = 90;
   }
   
-  function checkSecondHalfBonus() {
-    if (state.secondHalfStarted) return;
-    if (state.minute < 46) return;
+  async function checkSecondHalfBonus() {
+    if (state.secondHalfStarted || state.minute < 46) return;
   
     state.secondHalfStarted = true;
   
     if (!state.hiddenBonus || state.bonusRevealed) {
-      logMessage(`<strong>⏱️ Segundo tempo!</strong> A partida recomeça com tensão renovada.`);
+      logMessage(`<strong>⏱️ Segundo tempo!</strong> A bola volta a rolar com tensão renovada.`);
       return;
     }
   
     state.bonusRevealed = true;
-    applyHiddenBonus();
+    await applyHiddenBonus();
   }
   
-  function applyHiddenBonus() {
+  async function applyHiddenBonus() {
     const bonus = state.hiddenBonus;
     if (!bonus) return;
   
-    logMessage(
-      `<strong>🎁 Bônus revelado no segundo tempo:</strong> <strong>${bonus.title}</strong> entra em ação.`
-    );
+    logMessage(`<strong>🎁 Bônus revelado:</strong> <strong>${bonus.title}</strong> entra em ação no segundo tempo.`);
   
     switch (bonus.effect) {
       case "goal_plus":
         state.scorePlayer++;
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconBall()} O bônus secreto gera um gol instantâneo para o <strong>${state.playerTeam.name}</strong>!`,
+          `<strong>${state.minute}'</strong> ${iconBall()} O bônus secreto empurra a bola para a rede do <strong>${state.playerTeam.name}</strong>!`,
           "goal"
         );
         break;
   
       case "penalty_for":
-        logMessage(
-          `<strong>${state.minute}'</strong> 🎯 O bônus concede um pênalti para o seu time.`
-        );
-        resolveInteractivePenalty("player", true);
+        logMessage(`<strong>${state.minute}'</strong> 🎯 O bônus concede um pênalti para o seu time.`);
+        await resolveInteractivePenalty("player", true);
         break;
   
       case "cancel_penalty_against":
@@ -649,15 +668,13 @@ const TEAMS = [
   
       case "reduce_difficulty":
         if (state.difficulty > 1) state.difficulty--;
-        logMessage(
-          `<strong>${state.minute}'</strong> 📉 O bônus reduz a dificuldade para <strong>${getDifficultyLabel()}</strong>.`
-        );
+        logMessage(`<strong>${state.minute}'</strong> 📉 A dificuldade cai para <strong>${getDifficultyLabel()}</strong>.`);
         break;
   
       case "save_next_big_enemy":
         state.bonusFlags.saveNextBigEnemyAvailable = true;
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconGlove()} Uma defesa milagrosa ficou armazenada para o próximo grande lance rival.`,
+          `<strong>${state.minute}'</strong> ${iconGlove()} Uma defesa milagrosa ficou guardada para a próxima grande chance rival.`,
           "save"
         );
         break;
@@ -688,54 +705,128 @@ const TEAMS = [
     return Math.random() < chance;
   }
   
-  function resolveInteractivePenalty(side, forcedByBonus = false) {
-    const cornersEasy = ["esquerda", "direita"];
-    const cornersMedium = ["esquerda", "meio", "direita"];
-    const cornersHard = ["alto esquerda", "baixo esquerda", "meio", "alto direita", "baixo direita"];
+  // PÊNALTI INTERATIVO
+  function getPenaltyOptionsByDifficulty() {
+    if (state.difficulty === 1) {
+      return ["esquerda", "direita"];
+    }
+    if (state.difficulty === 2) {
+      return ["esquerda", "centro", "direita"];
+    }
+    return ["alto esquerda", "baixo esquerda", "centro", "alto direita", "baixo direita"];
+  }
   
-    const options =
-      state.difficulty === 1 ? cornersEasy :
-      state.difficulty === 2 ? cornersMedium :
-      cornersHard;
+  function getVisualPosition(choice) {
+    const map = {
+      "esquerda": { left: "28%", top: "48%" },
+      "direita": { left: "72%", top: "48%" },
+      "centro": { left: "50%", top: "48%" },
+      "alto esquerda": { left: "28%", top: "28%" },
+      "baixo esquerda": { left: "28%", top: "54%" },
+      "alto direita": { left: "72%", top: "28%" },
+      "baixo direita": { left: "72%", top: "54%" }
+    };
+    return map[choice] || { left: "50%", top: "48%" };
+  }
   
-    const chosenByShooter = randomFrom(options);
-    const chosenByKeeper = randomFrom(options);
+  async function openPenaltyScreen(side) {
+    penaltyOptions.innerHTML = "";
+    penaltyFeedback.textContent = "";
+    ballMarker.classList.add("hidden");
+    keeperMarker.style.left = "50%";
+    keeperMarker.style.top = "56%";
+  
+    penaltyTitle.textContent = side === "player" ? "Pênalti para seu time" : "Pênalti para o adversário";
+    penaltySubtitle.textContent = "Escolha para qual canto o goleiro deve pular.";
+  
+    const options = getPenaltyOptionsByDifficulty();
+  
+    penaltyScreen.classList.remove("hidden");
+  
+    return new Promise(resolve => {
+      state.penaltyResolver = resolve;
+  
+      options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.className = "penalty-option-btn";
+        btn.textContent = option;
+        btn.addEventListener("click", async () => {
+          penaltyOptions.querySelectorAll("button").forEach(b => (b.disabled = true));
+  
+          const shot = randomFrom(options);
+          const keeper = option;
+  
+          const keeperPos = getVisualPosition(keeper);
+          const ballPos = getVisualPosition(shot);
+  
+          keeperMarker.style.left = keeperPos.left;
+          keeperMarker.style.top = keeperPos.top;
+  
+          await delay(250);
+  
+          ballMarker.classList.remove("hidden");
+          ballMarker.style.left = ballPos.left;
+          ballMarker.style.top = ballPos.top;
+  
+          await delay(550);
+  
+          const defended = shot === keeper;
+  
+          if (defended) {
+            penaltyFeedback.textContent = "Defesa!";
+          } else {
+            penaltyFeedback.textContent = "Gol!";
+          }
+  
+          await delay(700);
+  
+          penaltyScreen.classList.add("hidden");
+          const resolver = state.penaltyResolver;
+          state.penaltyResolver = null;
+          resolver({ shot, keeper, defended });
+        });
+  
+        penaltyOptions.appendChild(btn);
+      });
+    });
+  }
+  
+  async function resolveInteractivePenalty(side, forcedByBonus = false) {
+    if (side === "enemy" && state.bonusFlags.cancelPenaltyAgainstAvailable && !forcedByBonus) {
+      state.bonusFlags.cancelPenaltyAgainstAvailable = false;
+      logMessage(
+        `<strong>${state.minute}'</strong> ${iconGlove()} O bônus secreto anulou o pênalti contra antes mesmo da cobrança!`,
+        "save"
+      );
+      return;
+    }
+  
+    const result = await openPenaltyScreen(side);
   
     if (side === "player") {
-      const scored = chosenByShooter !== chosenByKeeper || Math.random() < 0.2;
-      if (scored) {
-        state.scorePlayer++;
+      if (result.defended) {
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconBall()} Pênalti para seu time. Cobrança no canto <strong>${chosenByShooter}</strong> e gol!`,
-          "goal"
+          `<strong>${state.minute}'</strong> ${iconGlove()} Pênalti para seu time. O goleiro rival acerta o canto <strong>${result.keeper}</strong> e faz a defesa!`,
+          "save"
         );
       } else {
+        state.scorePlayer++;
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconGlove()} Pênalti para seu time. O goleiro rival acerta o canto <strong>${chosenByKeeper}</strong> e defende!`,
-          "save"
+          `<strong>${state.minute}'</strong> ${iconBall()} Pênalti para seu time. Bola em <strong>${result.shot}</strong> e gol!`,
+          "goal"
         );
       }
     } else {
-      if (state.bonusFlags.cancelPenaltyAgainstAvailable && !forcedByBonus) {
-        state.bonusFlags.cancelPenaltyAgainstAvailable = false;
+      if (result.defended) {
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconGlove()} O bônus secreto anulou o pênalti contra antes da cobrança!`,
+          `<strong>${state.minute}'</strong> ${iconGlove()} Pênalti para o adversário. Seu goleiro voa em <strong>${result.keeper}</strong> e salva!`,
           "save"
-        );
-        return;
-      }
-  
-      const scored = chosenByShooter !== chosenByKeeper || Math.random() < 0.15;
-      if (scored) {
-        state.scoreEnemy++;
-        logMessage(
-          `<strong>${state.minute}'</strong> ${iconBall()} Pênalti para o adversário. Chute no <strong>${chosenByShooter}</strong> e gol.`,
-          "goal"
         );
       } else {
+        state.scoreEnemy++;
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconGlove()} Pênalti para o adversário. Seu goleiro vai no <strong>${chosenByKeeper}</strong> e salva!`,
-          "save"
+          `<strong>${state.minute}'</strong> ${iconBall()} Pênalti para o adversário. Chute em <strong>${result.shot}</strong> e gol.`,
+          "goal"
         );
       }
     }
@@ -777,17 +868,17 @@ const TEAMS = [
     }
   }
   
-  function resolveEvent(eventData) {
+  async function resolveEvent(eventData) {
     switch (eventData.type) {
       case "goal_player":
         if (chanceForPlayerGoal()) {
           state.scorePlayer++;
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconBall()} GOL do <strong>${state.playerTeam.name}</strong>! O estádio entra em combustão emocional.`,
+            `<strong>${state.minute}'</strong> ${iconBall()} GOL do <strong>${state.playerTeam.name}</strong>!`,
             "goal"
           );
         } else {
-          logMessage(`<strong>${state.minute}'</strong> Seu time atacou bem, mas a finalização saiu torta.`);
+          logMessage(`<strong>${state.minute}'</strong> Seu time atacou bem, mas finalizou para fora.`);
         }
         break;
   
@@ -795,12 +886,12 @@ const TEAMS = [
         if (chanceForEnemyGoal()) {
           state.scoreEnemy++;
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconBall()} Gol do <strong>${state.enemyTeam.name}</strong>. A defesa ficou em câmera lenta.`,
+            `<strong>${state.minute}'</strong> ${iconBall()} Gol do <strong>${state.enemyTeam.name}</strong>.`,
             "goal"
           );
         } else {
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconGlove()} O rival finaliza, mas seu goleiro segura.`,
+            `<strong>${state.minute}'</strong> ${iconGlove()} O adversário finaliza, mas seu goleiro segura.`,
             "save"
           );
         }
@@ -845,7 +936,7 @@ const TEAMS = [
         if (Math.random() < 0.42 + (state.bonusFlags.playerAttackBoostActive ? 0.1 : 0)) {
           state.scorePlayer++;
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconBall()} Jogada perigosa bem concluída. Bola na rede para o seu time!`,
+            `<strong>${state.minute}'</strong> ${iconBall()} Jogada de perigo bem concluída. Gol!`,
             "goal"
           );
         } else {
@@ -872,7 +963,7 @@ const TEAMS = [
         if (Math.random() < 0.58 + (state.bonusFlags.playerAttackBoostActive ? 0.1 : 0)) {
           state.scorePlayer++;
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconBall()} Grande chance criada e concluída. Gol do <strong>${state.playerTeam.name}</strong>!`,
+            `<strong>${state.minute}'</strong> ${iconBall()} Grande chance criada e convertida em gol!`,
             "goal"
           );
         } else {
@@ -887,7 +978,7 @@ const TEAMS = [
         if (state.bonusFlags.saveNextBigEnemyAvailable) {
           state.bonusFlags.saveNextBigEnemyAvailable = false;
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconGlove()} A defesa milagrosa armazenada entra em ação e impede a grande chance rival!`,
+            `<strong>${state.minute}'</strong> ${iconGlove()} A defesa milagrosa guardada entra em ação e impede a grande chance rival!`,
             "save"
           );
         } else if (Math.random() < 0.58 + state.difficulty * 0.05) {
@@ -898,25 +989,25 @@ const TEAMS = [
           );
         } else {
           logMessage(
-            `<strong>${state.minute}'</strong> ${iconGlove()} Seu goleiro opera um milagre e salva a grande chance rival!`,
+            `<strong>${state.minute}'</strong> ${iconGlove()} Seu goleiro faz um milagre e salva a grande chance rival!`,
             "save"
           );
         }
         break;
   
       case "penalty_player":
-        resolveInteractivePenalty("player");
+        await resolveInteractivePenalty("player");
         break;
   
       case "penalty_enemy":
-        resolveInteractivePenalty("enemy");
+        await resolveInteractivePenalty("enemy");
         break;
   
       case "boost":
         if (state.difficulty > 1) {
           state.difficulty--;
           logMessage(
-            `<strong>${state.minute}'</strong> 📈 Seu time encaixa melhor o jogo. A dificuldade cai para <strong>${getDifficultyLabel()}</strong>.`
+            `<strong>${state.minute}'</strong> 📈 Seu time organiza melhor o jogo. A dificuldade cai para <strong>${getDifficultyLabel()}</strong>.`
           );
         } else {
           logMessage(`<strong>${state.minute}'</strong> Seu time cresce, mas a dificuldade já está no mínimo.`);
@@ -935,43 +1026,54 @@ const TEAMS = [
     eventCardsContainer.innerHTML = "";
     revealSelectedBtn.classList.add("hidden");
     nextTurnBtn.classList.add("hidden");
+    setMatchVisualState(false);
   
-    const stage = getCurrentStage();
     let title = "";
     let text = "";
   
-    if (state.scorePlayer > state.scoreEnemy) {
-      title = "Vitória!";
-      if (state.currentStageIndex < STAGES.length - 1) {
-        text = `Você venceu ${state.enemyTeam.name} por ${state.scorePlayer} x ${state.scoreEnemy} e avançou para a próxima fase: ${STAGES[state.currentStageIndex + 1].label}.`;
-        continueCampaignBtn.classList.remove("hidden");
-        restartCampaignBtn.classList.add("hidden");
-        setCampaignStatus(`Classificado para a próxima fase: ${STAGES[state.currentStageIndex + 1].label}`);
-      } else {
-        text = `Você venceu a final contra ${state.enemyTeam.name} por ${state.scorePlayer} x ${state.scoreEnemy} e conquistou a Copa do Caos!`;
+    if (state.gameMode === "single") {
+      title = state.scorePlayer > state.scoreEnemy ? "Vitória!" :
+              state.scorePlayer < state.scoreEnemy ? "Derrota" : "Empate";
+  
+      text = `Placar final: ${state.playerTeam.name} ${state.scorePlayer} x ${state.scoreEnemy} ${state.enemyTeam.name}.`;
+      continueCampaignBtn.classList.add("hidden");
+      restartCampaignBtn.classList.remove("hidden");
+      restartCampaignBtn.textContent = "Voltar ao início";
+    } else {
+      if (state.scorePlayer > state.scoreEnemy) {
+        title = "Vitória!";
+        if (state.currentStageIndex < STAGES.length - 1) {
+          text = `Você venceu ${state.enemyTeam.name} por ${state.scorePlayer} x ${state.scoreEnemy} e avançou para ${STAGES[state.currentStageIndex + 1].label}.`;
+          continueCampaignBtn.classList.remove("hidden");
+          restartCampaignBtn.classList.add("hidden");
+          setCampaignStatus(`Classificado para ${STAGES[state.currentStageIndex + 1].label}`);
+        } else {
+          text = `Você venceu a final contra ${state.enemyTeam.name} por ${state.scorePlayer} x ${state.scoreEnemy} e conquistou a Copa do Caos!`;
+          continueCampaignBtn.classList.add("hidden");
+          restartCampaignBtn.classList.remove("hidden");
+          restartCampaignBtn.textContent = "Voltar ao início";
+          setCampaignStatus("Campeão da Copa do Caos");
+        }
+      } else if (state.scorePlayer < state.scoreEnemy) {
+        title = "Derrota";
+        text = `Você perdeu para ${state.enemyTeam.name} por ${state.scorePlayer} x ${state.scoreEnemy}. A campanha foi encerrada.`;
         continueCampaignBtn.classList.add("hidden");
         restartCampaignBtn.classList.remove("hidden");
-        setCampaignStatus("Campeão da Copa do Caos");
+        restartCampaignBtn.textContent = "Voltar ao início";
+        setCampaignStatus("Campanha encerrada");
+      } else {
+        title = "Empate";
+        text = `A partida terminou empatada em ${state.scorePlayer} x ${state.scoreEnemy}. Neste protótipo, empate encerra a campanha.`;
+        continueCampaignBtn.classList.add("hidden");
+        restartCampaignBtn.classList.remove("hidden");
+        restartCampaignBtn.textContent = "Voltar ao início";
+        setCampaignStatus("Empate eliminatório");
       }
-    } else if (state.scorePlayer < state.scoreEnemy) {
-      title = "Derrota";
-      text = `Você perdeu para ${state.enemyTeam.name} por ${state.scorePlayer} x ${state.scoreEnemy}. A campanha foi encerrada e o campeonato volta ao início.`;
-      continueCampaignBtn.classList.add("hidden");
-      restartCampaignBtn.classList.remove("hidden");
-      setCampaignStatus("Campanha encerrada. Será preciso recomeçar");
-    } else {
-      title = "Empate";
-      text = `A partida terminou empatada em ${state.scorePlayer} x ${state.scoreEnemy}. Neste protótipo, empate conta como eliminação e a campanha reinicia.`;
-      continueCampaignBtn.classList.add("hidden");
-      restartCampaignBtn.classList.remove("hidden");
-      setCampaignStatus("Empate eliminatório. Será preciso recomeçar");
     }
   
     resultTitle.textContent = title;
     resultText.textContent = text;
-  
     logMessage(`<strong>🏁 Fim de jogo!</strong> ${text}`);
-    restartBtn.classList.remove("hidden");
     showScreen(screenResult);
   }
   
@@ -980,36 +1082,29 @@ const TEAMS = [
     state.currentStageIndex++;
     state.enemyTeam = null;
     state.hiddenBonus = null;
-  
     updateTournamentUI();
-  
-    if (state.currentStageIndex >= STAGES.length) {
-      state.currentStageIndex = 0;
-    }
-  
     state.phase = "choose-enemy";
-    showScreen(screenSelection);
+    setMatchVisualState(false);
     setupSelectionPhase();
+    showScreen(screenSelection);
   }
   
-  function resetCampaign() {
-    state.currentStageIndex = 0;
-    state.phase = "choose-player";
-    state.playerTeam = null;
-    state.enemyTeam = null;
-    state.hiddenBonus = null;
-    state.bonusRevealed = false;
-  
-    updateTournamentUI();
-    setCampaignStatus("Escolha seu time para iniciar a campanha");
-    showScreen(screenSelection);
-    setupSelectionPhase();
+  function resetToHome() {
+    goHome();
   }
   
-  // EVENTOS
+  // EVENTOS DE UI
+  openModeMenuBtn.addEventListener("click", openModeMenu);
+  openHowToPlayBtn.addEventListener("click", openHowToPlay);
+  closeHowToPlayBtn.addEventListener("click", openModeMenu);
+  backHomeBtn.addEventListener("click", goHome);
+  
+  singleMatchBtn.addEventListener("click", startSingleMatchMode);
+  championshipBtn.addEventListener("click", startChampionshipMode);
+  
   confirmYes.addEventListener("click", () => {
-    if (typeof state.pendingChoice === "number") {
-      revealSelection(state.pendingChoice);
+    if (state.pendingChoice?.type === "selection") {
+      revealSelection(state.pendingChoice.index);
     } else if (state.pendingChoice?.type === "bonus") {
       revealBonusChoice(state.pendingChoice.index, state.pendingChoice.options);
     }
@@ -1025,32 +1120,18 @@ const TEAMS = [
   
   nextStageBtn.addEventListener("click", () => {
     state.phase = "choose-enemy";
-    showScreen(screenSelection);
     setupSelectionPhase();
   });
   
-  toBonusBtn.addEventListener("click", () => {
-    setupBonusPhase();
-  });
-  
-  startMatchBtn.addEventListener("click", startMatch);
-  
-  confirmBonusStageBtn.addEventListener("click", () => {
-    startMatch();
-  });
+  toBonusBtn.addEventListener("click", setupBonusPhase);
+  confirmBonusStageBtn.addEventListener("click", startMatch);
   
   revealSelectedBtn.addEventListener("click", revealChosenCardsSequentially);
-  
   nextTurnBtn.addEventListener("click", generateTurn);
   
-  restartBtn.addEventListener("click", resetCampaign);
-  
   continueCampaignBtn.addEventListener("click", advanceCampaign);
-  
-  restartCampaignBtn.addEventListener("click", resetCampaign);
+  restartCampaignBtn.addEventListener("click", resetToHome);
   
   // INIT
-  updateTournamentUI();
+  goHome();
   updateScoreboard();
-  setupSelectionPhase();
-  setCampaignStatus("Escolha seu time para iniciar a campanha");
