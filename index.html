@@ -9,7 +9,6 @@
 <body>
   <div class="app">
 
-    <!-- HEADER / TOPO -->
     <header id="top-header" class="top-header">
       <div class="brand">
         <h1>⚽ Copa do Caos</h1>
@@ -17,7 +16,6 @@
       </div>
     </header>
 
-    <!-- BARRA DO CAMPEONATO -->
     <section id="tournament-bar" class="tournament-bar">
       <div class="tournament-top">
         <span id="stage-badge" class="stage-badge">Oitavas de final</span>
@@ -32,7 +30,6 @@
       </div>
     </section>
 
-    <!-- TELA INICIAL -->
     <section id="screen-home" class="screen active">
       <div class="menu-card">
         <h2>Bem-vindo à Copa do Caos</h2>
@@ -48,7 +45,6 @@
       </div>
     </section>
 
-    <!-- TELA MODOS -->
     <section id="screen-mode" class="screen">
       <div class="menu-card">
         <h2>Escolha o modo</h2>
@@ -72,7 +68,6 @@
       </div>
     </section>
 
-    <!-- COMO JOGAR -->
     <section id="screen-how-to-play" class="screen">
       <div class="menu-card howto-card">
         <h2>Como jogar</h2>
@@ -83,9 +78,9 @@
           <p><strong>3.</strong> Escolha um bônus secreto, revelado no segundo tempo.</p>
           <p><strong>4.</strong> Durante a partida, selecione 3 cartas entre 10.</p>
           <p><strong>5.</strong> As cartas se revelam uma por uma e alteram o jogo.</p>
-          <p><strong>6.</strong> Pênaltis possuem uma tela própria. Você escolhe o canto do goleiro.</p>
-          <p><strong>7.</strong> Na partida única, o jogo termina em uma só partida.</p>
-          <p><strong>8.</strong> No campeonato, você precisa vencer fase após fase até a final.</p>
+          <p><strong>6.</strong> Pênaltis possuem uma tela própria.</p>
+          <p><strong>7.</strong> Na defesa, você escolhe onde o goleiro pula.</p>
+          <p><strong>8.</strong> No ataque, você escolhe onde o cobrador chuta.</p>
         </div>
 
         <div class="home-actions">
@@ -94,7 +89,6 @@
       </div>
     </section>
 
-    <!-- SELEÇÃO -->
     <section id="screen-selection" class="screen">
       <div class="selection-shell">
         <div class="section-header compact">
@@ -104,14 +98,13 @@
 
         <div id="selection-grid" class="selection-grid"></div>
 
-        <div class="actions compact-actions">
-          <button id="next-stage-btn" class="btn primary hidden">Próxima etapa</button>
-          <button id="to-bonus-btn" class="btn primary hidden">Escolher bônus secreto</button>
+        <div class="actions compact-actions hidden">
+          <button id="next-stage-btn" class="btn primary">Próxima etapa</button>
+          <button id="to-bonus-btn" class="btn primary">Escolher bônus secreto</button>
         </div>
       </div>
     </section>
 
-    <!-- BÔNUS -->
     <section id="screen-bonus" class="screen">
       <div class="bonus-shell">
         <div class="section-header">
@@ -127,7 +120,6 @@
       </div>
     </section>
 
-    <!-- PARTIDA -->
     <section id="screen-match" class="screen">
       <div class="match-shell">
         <div class="scoreboard compact-scoreboard">
@@ -176,7 +168,6 @@
       </div>
     </section>
 
-    <!-- RESULTADO -->
     <section id="screen-result" class="screen">
       <div class="menu-card">
         <h2 id="result-title">Resultado</h2>
@@ -189,7 +180,6 @@
       </div>
     </section>
 
-    <!-- MODAL CONFIRMAÇÃO -->
     <div id="confirm-modal" class="modal hidden">
       <div class="modal-content">
         <h3 id="modal-title">Confirmar escolha</h3>
@@ -201,11 +191,18 @@
       </div>
     </div>
 
-    <!-- TELA DE PÊNALTI -->
+    <div id="progress-overlay" class="progress-overlay hidden">
+      <div id="progress-card" class="progress-card">
+        <h3 id="progress-title">Escolha concluída</h3>
+        <p id="progress-text">Clique para avançar.</p>
+        <button id="progress-btn" class="btn primary">Continuar</button>
+      </div>
+    </div>
+
     <div id="penalty-screen" class="penalty-screen hidden">
       <div class="penalty-card">
         <h2 id="penalty-title">Pênalti!</h2>
-        <p id="penalty-subtitle">Escolha para qual canto o goleiro deve pular.</p>
+        <p id="penalty-subtitle">Faça sua escolha.</p>
 
         <div class="penalty-arena">
           <div class="goal-visual">
@@ -216,7 +213,6 @@
         </div>
 
         <div id="penalty-options" class="penalty-options"></div>
-
         <div id="penalty-feedback" class="penalty-feedback"></div>
       </div>
     </div>

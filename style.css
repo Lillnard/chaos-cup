@@ -424,7 +424,6 @@
     display: none !important;
   }
   
-  /* PARTIDA */
   .match-shell {
     gap: 10px;
   }
@@ -645,8 +644,8 @@
     background: rgba(255, 203, 61, 0.12);
   }
   
-  /* MODAL */
-  .modal {
+  .modal,
+  .progress-overlay {
     position: fixed;
     inset: 0;
     background: rgba(4, 15, 10, 0.72);
@@ -657,8 +656,9 @@
     z-index: 50;
   }
   
-  .modal-content {
-    width: min(420px, 100%);
+  .modal-content,
+  .progress-card {
+    width: min(440px, 100%);
     background: linear-gradient(180deg, rgba(20, 53, 35, 0.98), rgba(16, 45, 29, 0.98));
     border: 1px solid var(--line);
     border-radius: 18px;
@@ -667,12 +667,14 @@
     text-align: center;
   }
   
-  .modal-content h3 {
+  .modal-content h3,
+  .progress-card h3 {
     color: var(--accent);
     margin-bottom: 10px;
   }
   
-  .modal-content p {
+  .modal-content p,
+  .progress-card p {
     color: var(--muted);
     line-height: 1.5;
   }
@@ -685,7 +687,14 @@
     margin-top: 18px;
   }
   
-  /* PÊNALTI */
+  .progress-card {
+    cursor: pointer;
+  }
+  
+  .progress-card .btn {
+    margin-top: 14px;
+  }
+  
   .penalty-screen {
     position: fixed;
     inset: 0;
@@ -794,7 +803,6 @@
     font-weight: bold;
   }
   
-  /* RESPONSIVO */
   @media (max-width: 900px) {
     .match-content {
       grid-template-columns: 1fr;

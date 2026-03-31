@@ -22,48 +22,12 @@ const TEAMS = [
   ];
   
   const BONUS_CARDS = [
-    {
-      id: "bonus_goal",
-      icon: "⚽",
-      title: "Gol Relâmpago",
-      description: "No início do segundo tempo, seu time ganha 1 gol.",
-      effect: "goal_plus"
-    },
-    {
-      id: "bonus_penalty_for",
-      icon: "🎯",
-      title: "Pênalti a Favor",
-      description: "No início do segundo tempo, seu time recebe um pênalti.",
-      effect: "penalty_for"
-    },
-    {
-      id: "bonus_cancel_penalty",
-      icon: "🧤",
-      title: "Escudo do Goleiro",
-      description: "Anula o primeiro pênalti contra do segundo tempo.",
-      effect: "cancel_penalty_against"
-    },
-    {
-      id: "bonus_reduce_difficulty",
-      icon: "📉",
-      title: "Controle da Partida",
-      description: "A dificuldade cai em 1 nível no segundo tempo.",
-      effect: "reduce_difficulty"
-    },
-    {
-      id: "bonus_super_save",
-      icon: "🧱",
-      title: "Defesa Milagrosa",
-      description: "Bloqueia a próxima grande chance rival.",
-      effect: "save_next_big_enemy"
-    },
-    {
-      id: "bonus_extra_pressure",
-      icon: "🔥",
-      title: "Pressão Total",
-      description: "Aumenta a força ofensiva do seu time no segundo tempo.",
-      effect: "player_attack_boost"
-    }
+    { id: "bonus_goal", icon: "⚽", title: "Gol Relâmpago", description: "No início do segundo tempo, seu time ganha 1 gol.", effect: "goal_plus" },
+    { id: "bonus_penalty_for", icon: "🎯", title: "Pênalti a Favor", description: "No início do segundo tempo, seu time recebe um pênalti.", effect: "penalty_for" },
+    { id: "bonus_cancel_penalty", icon: "🧤", title: "Escudo do Goleiro", description: "Anula o primeiro pênalti contra do segundo tempo.", effect: "cancel_penalty_against" },
+    { id: "bonus_reduce_difficulty", icon: "📉", title: "Controle da Partida", description: "A dificuldade cai em 1 nível no segundo tempo.", effect: "reduce_difficulty" },
+    { id: "bonus_super_save", icon: "🧱", title: "Defesa Milagrosa", description: "Bloqueia a próxima grande chance rival.", effect: "save_next_big_enemy" },
+    { id: "bonus_extra_pressure", icon: "🔥", title: "Pressão Total", description: "Aumenta a força ofensiva do seu time no segundo tempo.", effect: "player_attack_boost" }
   ];
   
   const EVENT_POOL = [
@@ -91,7 +55,7 @@ const TEAMS = [
   ];
   
   const state = {
-    gameMode: null, // single | championship
+    gameMode: null,
     phase: "home",
     availableTeams: [],
     pendingChoice: null,
@@ -122,10 +86,10 @@ const TEAMS = [
     selectedTurnCards: [],
     revealQueueRunning: false,
   
-    penaltyResolver: null
+    penaltyResolver: null,
+    selectionAdvanceAction: null
   };
   
-  // ELEMENTOS
   const topHeader = document.getElementById("top-header");
   const tournamentBar = document.getElementById("tournament-bar");
   
@@ -180,6 +144,12 @@ const TEAMS = [
   const confirmYes = document.getElementById("confirm-yes");
   const confirmNo = document.getElementById("confirm-no");
   
+  const progressOverlay = document.getElementById("progress-overlay");
+  const progressCard = document.getElementById("progress-card");
+  const progressTitle = document.getElementById("progress-title");
+  const progressText = document.getElementById("progress-text");
+  const progressBtn = document.getElementById("progress-btn");
+  
   const penaltyScreen = document.getElementById("penalty-screen");
   const penaltyTitle = document.getElementById("penalty-title");
   const penaltySubtitle = document.getElementById("penalty-subtitle");
@@ -188,7 +158,6 @@ const TEAMS = [
   const keeperMarker = document.getElementById("keeper-marker");
   const ballMarker = document.getElementById("ball-marker");
   
-  // UTIL
   function shuffle(array) {
     return [...array].sort(() => Math.random() - 0.5);
   }
@@ -298,7 +267,28 @@ const TEAMS = [
     matchLog.prepend(div);
   }
   
-  // TELAS INICIAIS
+  function showProgressOverlay(title, text, action) {
+    state.selectionAdvanceAction = action;
+    progressTitle.textContent = title;
+    progressText.textContent = text;
+    progressOverlay.classList.remove("hidden");
+  }
+  
+  function hideProgressOverlay() {
+    progressOverlay.classList.add("hidden");
+  }
+  
+  function executeProgressAction() {
+    if (typeof state.selectionAdvanceAction === "function") {
+      const action = state.selectionAdvanceAction;
+      state.selectionAdvanceAction = null;
+      hideProgressOverlay();
+      action();
+    } else {
+      hideProgressOverlay();
+    }
+  }
+  
   function goHome() {
     state.phase = "home";
     state.gameMode = null;
@@ -346,12 +336,9 @@ const TEAMS = [
     showScreen(screenSelection);
   }
   
-  // SELEÇÃO
   function setupSelectionPhase() {
     state.availableTeams = shuffle(TEAMS);
     selectionGrid.innerHTML = "";
-    nextStageBtn.classList.add("hidden");
-    toBonusBtn.classList.add("hidden");
   
     if (state.phase === "choose-player") {
       selectionTitle.textContent = "Escolha seu time";
@@ -426,16 +413,30 @@ const TEAMS = [
   
     if (state.phase === "choose-player") {
       state.playerTeam = chosenTeam;
-      logMessage(`<strong>🏟️ Campanha iniciada:</strong> um clube foi escolhido para entrar em campo.`);
-      nextStageBtn.classList.remove("hidden");
+      logMessage(`<strong>🏟️ Time definido:</strong> ${chosenTeam.name} foi escolhido para a campanha.`);
+  
+      showProgressOverlay(
+        "Seu time foi selecionado",
+        `Você vai jogar com ${chosenTeam.name}. Toque em qualquer lugar ou no botão para escolher o adversário.`,
+        () => {
+          state.phase = "choose-enemy";
+          setupSelectionPhase();
+        }
+      );
     } else {
       state.enemyTeam = chosenTeam;
-      logMessage(`<strong>🧭 Adversário definido:</strong> o próximo confronto foi traçado.`);
-      toBonusBtn.classList.remove("hidden");
+      logMessage(`<strong>🧭 Adversário definido:</strong> ${chosenTeam.name} será o próximo rival.`);
+  
+      showProgressOverlay(
+        "Adversário selecionado",
+        `O próximo confronto será contra ${chosenTeam.name}. Toque em qualquer lugar ou no botão para escolher seu bônus secreto.`,
+        () => {
+          setupBonusPhase();
+        }
+      );
     }
   }
   
-  // BÔNUS
   function setupBonusPhase() {
     bonusGrid.innerHTML = "";
     confirmBonusStageBtn.classList.add("hidden");
@@ -488,7 +489,6 @@ const TEAMS = [
     confirmBonusStageBtn.classList.remove("hidden");
   }
   
-  // PARTIDA
   function resetMatchState() {
     state.scorePlayer = 0;
     state.scoreEnemy = 0;
@@ -705,7 +705,6 @@ const TEAMS = [
     return Math.random() < chance;
   }
   
-  // PÊNALTI INTERATIVO
   function getPenaltyOptionsByDifficulty() {
     if (state.difficulty === 1) {
       return ["esquerda", "direita"];
@@ -736,10 +735,15 @@ const TEAMS = [
     keeperMarker.style.left = "50%";
     keeperMarker.style.top = "56%";
   
-    penaltyTitle.textContent = side === "player" ? "Pênalti para seu time" : "Pênalti para o adversário";
-    penaltySubtitle.textContent = "Escolha para qual canto o goleiro deve pular.";
-  
     const options = getPenaltyOptionsByDifficulty();
+  
+    if (side === "player") {
+      penaltyTitle.textContent = "Pênalti para seu time";
+      penaltySubtitle.textContent = "Escolha para qual canto o atacante vai chutar.";
+    } else {
+      penaltyTitle.textContent = "Pênalti para o adversário";
+      penaltySubtitle.textContent = "Escolha para qual canto o goleiro deve pular.";
+    }
   
     penaltyScreen.classList.remove("hidden");
   
@@ -750,40 +754,67 @@ const TEAMS = [
         const btn = document.createElement("button");
         btn.className = "penalty-option-btn";
         btn.textContent = option;
+  
         btn.addEventListener("click", async () => {
           penaltyOptions.querySelectorAll("button").forEach(b => (b.disabled = true));
   
-          const shot = randomFrom(options);
-          const keeper = option;
+          if (side === "player") {
+            const shot = option;
+            const keeper = randomFrom(options);
   
-          const keeperPos = getVisualPosition(keeper);
-          const ballPos = getVisualPosition(shot);
+            const ballPos = getVisualPosition(shot);
+            const keeperPos = getVisualPosition(keeper);
   
-          keeperMarker.style.left = keeperPos.left;
-          keeperMarker.style.top = keeperPos.top;
+            ballMarker.classList.remove("hidden");
+            ballMarker.style.left = "50%";
+            ballMarker.style.top = "74%";
   
-          await delay(250);
+            await delay(220);
   
-          ballMarker.classList.remove("hidden");
-          ballMarker.style.left = ballPos.left;
-          ballMarker.style.top = ballPos.top;
+            ballMarker.style.left = ballPos.left;
+            ballMarker.style.top = ballPos.top;
+            keeperMarker.style.left = keeperPos.left;
+            keeperMarker.style.top = keeperPos.top;
   
-          await delay(550);
+            await delay(550);
   
-          const defended = shot === keeper;
+            const defended = shot === keeper;
+            penaltyFeedback.textContent = defended ? "Defesa!" : "Gol!";
   
-          if (defended) {
-            penaltyFeedback.textContent = "Defesa!";
+            await delay(700);
+            penaltyScreen.classList.add("hidden");
+  
+            const resolver = state.penaltyResolver;
+            state.penaltyResolver = null;
+            resolver({ shot, keeper, defended });
           } else {
-            penaltyFeedback.textContent = "Gol!";
+            const keeper = option;
+            const shot = randomFrom(options);
+  
+            const keeperPos = getVisualPosition(keeper);
+            const ballPos = getVisualPosition(shot);
+  
+            keeperMarker.style.left = keeperPos.left;
+            keeperMarker.style.top = keeperPos.top;
+  
+            await delay(220);
+  
+            ballMarker.classList.remove("hidden");
+            ballMarker.style.left = ballPos.left;
+            ballMarker.style.top = ballPos.top;
+  
+            await delay(550);
+  
+            const defended = shot === keeper;
+            penaltyFeedback.textContent = defended ? "Defesa!" : "Gol!";
+  
+            await delay(700);
+            penaltyScreen.classList.add("hidden");
+  
+            const resolver = state.penaltyResolver;
+            state.penaltyResolver = null;
+            resolver({ shot, keeper, defended });
           }
-  
-          await delay(700);
-  
-          penaltyScreen.classList.add("hidden");
-          const resolver = state.penaltyResolver;
-          state.penaltyResolver = null;
-          resolver({ shot, keeper, defended });
         });
   
         penaltyOptions.appendChild(btn);
@@ -806,26 +837,26 @@ const TEAMS = [
     if (side === "player") {
       if (result.defended) {
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconGlove()} Pênalti para seu time. O goleiro rival acerta o canto <strong>${result.keeper}</strong> e faz a defesa!`,
+          `<strong>${state.minute}'</strong> ${iconGlove()} Você escolheu chutar em <strong>${result.shot}</strong>, mas o goleiro rival defendeu!`,
           "save"
         );
       } else {
         state.scorePlayer++;
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconBall()} Pênalti para seu time. Bola em <strong>${result.shot}</strong> e gol!`,
+          `<strong>${state.minute}'</strong> ${iconBall()} Você escolheu o canto <strong>${result.shot}</strong> e marcou o gol!`,
           "goal"
         );
       }
     } else {
       if (result.defended) {
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconGlove()} Pênalti para o adversário. Seu goleiro voa em <strong>${result.keeper}</strong> e salva!`,
+          `<strong>${state.minute}'</strong> ${iconGlove()} Você pulou em <strong>${result.keeper}</strong> e defendeu o pênalti!`,
           "save"
         );
       } else {
         state.scoreEnemy++;
         logMessage(
-          `<strong>${state.minute}'</strong> ${iconBall()} Pênalti para o adversário. Chute em <strong>${result.shot}</strong> e gol.`,
+          `<strong>${state.minute}'</strong> ${iconBall()} Você pulou em <strong>${result.keeper}</strong>, mas a bola foi em <strong>${result.shot}</strong>. Gol do adversário.`,
           "goal"
         );
       }
@@ -1077,7 +1108,6 @@ const TEAMS = [
     showScreen(screenResult);
   }
   
-  // CAMPANHA
   function advanceCampaign() {
     state.currentStageIndex++;
     state.enemyTeam = null;
@@ -1093,7 +1123,6 @@ const TEAMS = [
     goHome();
   }
   
-  // EVENTOS DE UI
   openModeMenuBtn.addEventListener("click", openModeMenu);
   openHowToPlayBtn.addEventListener("click", openHowToPlay);
   closeHowToPlayBtn.addEventListener("click", openModeMenu);
@@ -1132,6 +1161,13 @@ const TEAMS = [
   continueCampaignBtn.addEventListener("click", advanceCampaign);
   restartCampaignBtn.addEventListener("click", resetToHome);
   
-  // INIT
+  progressBtn.addEventListener("click", executeProgressAction);
+  progressCard.addEventListener("click", executeProgressAction);
+  progressOverlay.addEventListener("click", (e) => {
+    if (e.target === progressOverlay) {
+      executeProgressAction();
+    }
+  });
+  
   goHome();
   updateScoreboard();
